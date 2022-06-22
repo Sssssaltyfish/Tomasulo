@@ -10,7 +10,7 @@ constexpr word MAXLINELENGTH = 1000; /* 机器指令的最大长度 */
 constexpr word MEMSIZE = 10000;      /* 内存的最大容量     */
 constexpr word NUMREGS = 32;         /* 寄存器数量         */
 
-constexpr word INVALID = -1;
+constexpr word INVALID = (word)-1;
 
 /*
  * 操作码和功能码定义
