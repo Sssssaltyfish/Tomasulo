@@ -480,7 +480,8 @@ struct MachineState {
         }
 
         // processing
-        for (size_t robIdx = 0; robIdx < rob.size(); ++robIdx) {
+        bool cdbFree = true;
+        for (size_t robIdx = robHeadIdx; robIdx != robTailIdx; robIdx = (robIdx + 1) % ROBSIZE) {
             auto& robEntry = rob[robIdx];
             auto unit = robEntry.execUnit;
             auto& reserv = reservation[unit];
@@ -495,11 +496,20 @@ struct MachineState {
                         if (opcode(instr) == SW) {
                             robEntry.address = reserv.Vj + immEx(instr);
                         }
-                        broadcastUpdate(unit, getResult(unit));
-                        reserv = {};
+                        if (cdbFree) {
+                            broadcastUpdate(unit, getResult(unit));
+                            reserv = {};
+                            cdbFree = false;
+                        }
                     }
                 } else if (robEntry.instrStatus == WRITING_RESULT) {
-                    robEntry.instrStatus = COMMITTING;
+                    if (robEntry.valid) {
+                        robEntry.instrStatus = COMMITTING;
+                    } else if (cdbFree) {
+                        broadcastUpdate(unit, getResult(unit));
+                        reserv = {};
+                        cdbFree = false;
+                    }
                 } else if (robEntry.instrStatus == ISSUING && reserv.Qj == READY && reserv.Qk == READY) {
                     robEntry.instrStatus = EXECUTING;
                     reserv.exTimeLeft -= 1;
