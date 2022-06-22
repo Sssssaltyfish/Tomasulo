@@ -4,6 +4,8 @@ set_version("0.0.1")
 add_rules("mode.debug", "mode.release")
 set_languages("cxx17")
 set_warnings("everything", "error")
+add_cxflags("-Wno-c++98-compat", "-Wno-old-style-cast")
+
 
 target("tomasulo")
     set_kind("shared")
