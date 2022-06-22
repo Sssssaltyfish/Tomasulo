@@ -18,6 +18,7 @@ class TomasuloError : public std::exception {
 
     TomasuloError() = default;
     TomasuloError(const TomasuloError&) = default;
+    TomasuloError(TomasuloError&) = default;
     TomasuloError(TomasuloError&&) = default;
 
     virtual const char* what() const noexcept override {
