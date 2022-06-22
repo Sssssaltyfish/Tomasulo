@@ -1,12 +1,15 @@
 #! /usr/bin/env python3
 
-import argparse
-from cProfile import label
 import os
 import sys
+import argparse
+
 from typing import Callable
+from pathlib import Path
 
 sys.path.append(".")
+libpath = Path(__file__).parent.absolute() / "../lib"
+os.add_dll_directory(libpath.absolute().as_posix())
 
 import tkinter as tk
 import tkinter.messagebox as msg
