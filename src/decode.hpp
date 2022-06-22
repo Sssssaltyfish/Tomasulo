@@ -4,20 +4,23 @@
 #include <string.h>
 #include <type_traits>
 
+// get [ `from`, `to` ] bits of `w`
 // `from` shall be greater than `to`
 inline __attribute__((always_inline)) constexpr word getField(word w, word from, word to) {
     return (w >> to) & ((1 << (from - to + 1)) - 1);
 }
 
+// get an N-bit 1-mask
 inline constexpr word maskN(word N) {
     return (1 << N) - 1;
 }
 
-// convert an N bit number into a 32-bit or 64-bit number
+// convert an N bit number into a 32-bit number
 template <const word N> inline constexpr word signExtend(word num) {
     constexpr word shift = sizeof(word) * 8 - N;
     return (std::make_signed_t<word>(num) << shift) >> shift;
 }
+
 inline constexpr word opcode(word instr) {
     return getField(instr, 31, 26);
 }

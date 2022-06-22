@@ -71,6 +71,7 @@ struct MachineState {
     }
 
     void resetROB() {
+        //* 清空 ROB
         robHeadIdx = 0;
         robTailIdx = 0;
         for (auto& robEntry : rob) {
@@ -79,12 +80,14 @@ struct MachineState {
     }
 
     void resetReserve() {
+        //* 清空所有保留站
         for (auto& reservEntry : reservation) {
             reservEntry = {};
         }
     }
 
     void resetRegResult() {
+        //* 清空"寄存器状态"中的各项, 即使得所有寄存器直接可用
         for (auto& rg : regResult) {
             rg = {};
         }
@@ -309,10 +312,12 @@ struct MachineState {
     }
 
     size_t robHead() const {
+        //* 返回 ROB 头指针, 如不存在, 返回全 1
         return robHeadIdx == robTailIdx ? (size_t)-1 : robHeadIdx;
     }
 
     size_t robPop() {
+        //* 相当于在循环队列中 `popFront`
         if (robHeadIdx == robTailIdx)
             return (size_t)-1;
         auto ret = robHeadIdx;
@@ -323,6 +328,7 @@ struct MachineState {
     }
 
     size_t robPush() {
+        //* 相当于在循环队列中 `pushBack`
         if ((robHeadIdx - robTailIdx) % ROBSIZE == 1)
             return (size_t)-1;
         auto ret = robTailIdx;
@@ -332,14 +338,17 @@ struct MachineState {
     }
 
     void loadInstr(word pc, const char* instr) {
+        //* 加载一条指令至给定位置, 用来和可视化代码交互
         memcpy(&memory[pc], instr, sizeof(word));
     }
 
     void setMemorySize(word size) {
+        //* 设置内存的可用区间大小, 用来和可视化代码交互
         memorySize = size;
     }
 
     void commitInstr(word robIdx) {
+        //* 提交一条指令, 视指令类型造成相应的后果
         auto& robEntry = rob[robIdx];
         auto op = opcode(robEntry.instr);
         auto result = robEntry.result;
@@ -366,14 +375,14 @@ struct MachineState {
             return;
         }
         case BEQZ: {
-            auto actualTarget = immEx(instr) + 1 + robEntry.pc;
+            auto branchTarget = immEx(instr) + 1 + robEntry.pc;
             auto taken = result == 0;
-            updateBTB(robEntry.pc, actualTarget, taken);
-            if (taken && robEntry.address != actualTarget) {
+            updateBTB(robEntry.pc, branchTarget, taken);
+            if ((taken && robEntry.address != branchTarget) || (!taken && robEntry.address != robEntry.pc + 1)) {
                 resetROB();
                 resetReserve();
                 resetRegResult();
-                pc = actualTarget;
+                pc = branchTarget;
             } else {
                 robPop();
             }
@@ -418,6 +427,7 @@ struct MachineState {
     }
 
     word getResult(word reservIdx) {
+        //* 模拟执行完毕了得到结果
         const auto& reserv = reservation[reservIdx];
         auto instr = reserv.instr;
         auto op = opcode(instr);
@@ -455,6 +465,7 @@ struct MachineState {
     }
 
     bool nextStep() {
+        //* 模拟时钟前进
         cycles += 1;
         // committing
         if (auto head = robHead(); head != (size_t)-1) {
