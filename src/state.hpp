@@ -419,9 +419,8 @@ struct MachineState {
             }
             break;
         }
-        case J:
-            robPop();
         default:
+            robPop();
             return;
         }
     }
