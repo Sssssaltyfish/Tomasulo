@@ -3,13 +3,15 @@
 import os
 import sys
 import argparse
+import platform
 
 from typing import Callable
-from pathlib import Path
 
 sys.path.append(".")
-libpath = Path(__file__).parent.absolute() / "../lib"
-os.add_dll_directory(libpath.absolute().as_posix())
+if platform.system() == "Windows":
+    from pathlib import Path
+    libpath = Path(__file__).parent.absolute() / "../lib"
+    os.add_dll_directory(libpath.absolute().as_posix())
 
 import tkinter as tk
 import tkinter.messagebox as msg
